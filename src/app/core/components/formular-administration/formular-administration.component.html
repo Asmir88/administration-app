@@ -1,0 +1,62 @@
+<div class="form-group row mt-50">
+    <label for="searchTerm" class="col-sm-3 col-form-label">Formular Name</label>
+    <div class="col-sm-7">
+        <input type="text" class="form-control" id="searchTerm">
+    </div>
+    <div class="col-sm-2">
+        <button type="button" class="btn btn-primary">Search</button>
+    </div>
+</div>
+
+<form class="mt-50" [formGroup]="formGroup">
+    <div class="form-group row">
+        <label for="formularName" class="col-sm-2 col-form-label">Element 1</label>
+        <div class="col-sm-2">
+            <input type="text" class="form-control" id="formularName">
+        </div>
+        <div class="form-group">
+            <div class="row">
+                <div class="col-sm-8">
+                    <select class="form-control" id="type" formControlName="type">
+                        <option [value]="textbox">Textbox</option>
+                        <option [value]="textbox">Checkbox</option>
+                        <option [value]="textbox">Radio buttons</option>
+                    </select>
+                </div>
+                <div class="col-sm-4">
+                    <select class="form-control" id="quantity" formControlName="quantity">
+                        <option [value]="1" selected>1</option>
+                        <option [value]="2">2</option>
+                        <option [value]="3">3</option>
+                        <option [value]="4">4</option>
+                        <option [value]="5">5</option>
+                        <option [value]="6">6</option>
+                        <option [value]="7">7</option>
+                        <option [value]="8">8</option>
+                        <option [value]="9">9</option>
+                        <option [value]="10">10</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-sm-12 radio-btn-label">
+                <input type="text" class="form-control" id="formularName">
+            </div>
+            <div class="col-sm-12 radio-btn-label">
+                <input type="text" class="form-control" id="formularName">
+            </div>
+            <div class="col-sm-12 radio-btn-label">
+                <input type="text" class="form-control" id="formularName">
+            </div>
+        </div>
+        <div class="col-sm-2">
+            <select class="form-control" id="validator" formControlName="validator">
+                <option [value]="textbox">Mandatory</option>
+                <option [value]="textbox">Number</option>
+                <option [value]="textbox">None</option>
+            </select>
+        </div>
+        <div class="col-sm-1">
+            <button type="button" class="btn btn-primary add-new">+</button>
+        </div>
+    </div>
+</form>
