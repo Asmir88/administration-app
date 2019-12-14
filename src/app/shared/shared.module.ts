@@ -1,18 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
-import { AngularMaterialModule } from './angular-material.module';
+import { NumberRangePipe } from './pipes/number-range.pipe';
 
 @NgModule({
     imports: [
-        AngularMaterialModule,
-        CommonModule,
-        ReactiveFormsModule
+        CommonModule
     ],
-    declarations: [],
+    declarations: [
+        NumberRangePipe
+    ],
     exports: [
-        CommonModule,
-        ReactiveFormsModule
+        NumberRangePipe
     ]
 })
 export class SharedModule { }

@@ -9,10 +9,18 @@ import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
 export class FormularAdministrationComponent implements OnInit {
     formGroup: FormGroup;
     public elementRows: FormArray;
+    public range = 10;
+    public types = [
+        { value: "textbox", text: "Textbox"},
+        { value: "checkbox", text: "Checkbox"},
+        { value: "radiobutton", text: "Radio button"}
+    ];
 
-    get getFormRow() {
-        return this.formGroup.get('formElements') as FormArray;
-    }
+    public validators = [
+        { value: "required", text: "Mandatory"},
+        { value: "numeric", text: "Number"},
+        { value: "none", text: "None"}
+    ];
 
     constructor(private fb: FormBuilder) {
         this.formGroup = this.fb.group({
@@ -30,22 +38,48 @@ export class FormularAdministrationComponent implements OnInit {
 
     createFormRow() {
         return this.fb.group({
-            name: new FormControl([null]),
-            type: new FormControl([null]),
-            quantity: new FormControl([null]),
-            radioButtonLabels: this.fb.array([this.fb.group({label: null})]),
-            validator: new FormControl(['none'])
+            name: null,
+            type: null,
+            quantity: null,
+            radioButtonLabels: this.fb.array([]),
+            validator: null
         });
     }
 
-    changeQuantity(index) {
+    changeValue(e, index, field) {
         const form = this.getFormGroup(index);
-        const fieldsAmount: number = form.controls['quantity'].value;
-        const labels = form.get('radioButtonLabels') as FormArray;
+        form.get(field).setValue(e.target.value, {
+            onlySelf: true
+        })
+    }
+
+    changeQuantity(e, index) {
+        const form = this.getFormGroup(index);
+        form.get('quantity').setValue(e.target.value, {
+            onlySelf: true
+        })
+        const fieldsAmount: number = form.get('quantity').value;
+        const labels = form.controls.radioButtonLabels as FormArray;
         const labelsAmount = labels.length;
-        for (let step = 0; step < fieldsAmount; step++) {
-            labels.push(this.fb.group({label: null}));
-          }
+        if (labelsAmount > fieldsAmount) {
+            for (let step = labelsAmount - 1; step >= fieldsAmount; step--) {
+                labels.removeAt(step);
+            }
+        } else if (labelsAmount < fieldsAmount) {
+            for (let step = 0; step < fieldsAmount - labelsAmount; step++) {
+                labels.push(this.radioButtonGroup());
+            }
+        } else {
+            for (let step = 0; step < fieldsAmount; step++) {
+                labels.push(this.radioButtonGroup());
+            }
+        }
+    }
+
+    private radioButtonGroup(): FormGroup {
+        return this.fb.group({
+            label: ''
+        });
     }
 
     getFormGroup(index): FormGroup {

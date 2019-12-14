@@ -5,12 +5,15 @@ import { CoreRoutingModule } from './core-routing.module';
 import { FormularDetailsComponent } from './components/formular-details/formular-details.component';
 import { FormularAdministrationComponent } from './components/formular-administration/formular-administration.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from '../shared/shared.module';
+import { NumberRangePipe } from '../shared/pipes/number-range.pipe';
 
 @NgModule({
     imports: [
         CommonModule,
         CoreRoutingModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        SharedModule
     ],
     declarations: [
         FormularComponent,
@@ -18,7 +21,9 @@ import { ReactiveFormsModule } from '@angular/forms';
         FormularDetailsComponent
     ],
     exports: [
-        FormularComponent
-    ]
+        FormularComponent,
+        SharedModule
+    ],
+    providers: [NumberRangePipe] 
 })
 export class CoreModule { }

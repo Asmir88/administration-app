@@ -8,7 +8,7 @@
     </div>
 </div>
 
-<form class="mt-50" [formGroup]="formGroup">
+<form class="mt-50" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <div formArrayName="formElements">
         <div class="form-group row" *ngFor="let formElement of formGroup.get('formElements').controls; let i = index;">
             <div [formGroupName]="i" class="row">
@@ -19,56 +19,35 @@
                 <div class="form-group">
                     <div class="row">
                         <div class="col-sm-8">
-                            <select class="form-control" formControlName="type">
-                                <option [value]="textbox">Textbox</option>
-                                <option [value]="textbox">Checkbox</option>
-                                <option [value]="textbox">Radio buttons</option>
+                            <select class="form-control" formControlName="type" (change)="changeValue($event, i, 'type')">
+                                <option *ngFor="let option of types" [value]="option.value">{{option.text}}</option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <select class="form-control" formControlName="quantity" (change)="changeQuantity(i)">
-                                <option [value]="1" selected>1</option>
-                                <option [value]="2">2</option>
-                                <option [value]="3">3</option>
-                                <option [value]="4">4</option>
-                                <option [value]="5">5</option>
-                                <option [value]="6">6</option>
-                                <option [value]="7">7</option>
-                                <option [value]="8">8</option>
-                                <option [value]="9">9</option>
-                                <option [value]="10">10</option>
+                            <select class="form-control" formControlName="quantity" (change)="changeQuantity($event, i)">
+                                <option *ngFor="let option of range | numberRange" [value]="option">{{option}}</option>
                             </select>
                         </div>
                     </div>
                     <div formArrayName="radioButtonLabels">
                         <div class="col-sm-12 radio-btn-label"
-                            *ngFor="let labelField of getFormGroup(i).get('radioButtonLabels').controls; let j = index;">
+                            *ngFor="let labelField of formElement.controls.radioButtonLabels.controls; let j = index;">
                             <div [formGroupName]="j" class="row">
                                 <input type="text" class="form-control" formControlName="label">
                             </div>
                         </div>
-                        <!-- <div class="col-sm-12 radio-btn-label">
-                            <input type="text" class="form-control">
-                        </div>
-                        <div class="col-sm-12 radio-btn-label">
-                            <input type="text" class="form-control">
-                        </div> -->
                     </div>
                 </div>
                 <div class="col-sm-2">
-                    <select class="form-control" formControlName="validator">
-                        <option [value]="textbox">Mandatory</option>
-                        <option [value]="textbox">Number</option>
-                        <option [value]="textbox">None</option>
+                    <select class="form-control" formControlName="validator" (change)="changeValue($event, i, 'validator')">
+                        <option *ngFor="let option of validators" [value]="option.value">{{option.text}}</option>
                     </select>
                 </div>
-                <div class="col-sm-1">
-                    <button type="button" class="btn btn-primary add-new" (click)="addRow()">+</button>
+                <div class="col-sm-1 add-new-button">
+                    <button type="button" class="btn btn-primary" (click)="addRow()">+</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-12">
-        <button type="submit" class="btn btn-primary pull-right">Search</button>
-    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
 </form>

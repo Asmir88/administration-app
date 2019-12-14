@@ -10,3 +10,29 @@
 .radio-btn-label {
     padding: 5px 0;
 }
+
+.btn.btn-primary {
+    float: right;
+}
+
+.form-group {
+    .add-new-button {
+        display: none;
+
+        &:last-child {
+            display: block;
+        }
+
+        button {
+            border-radius: 50%;
+        }
+    }
+
+    &:last-child {
+        .add-new-button {
+            &:last-child {
+                display: block;
+            }
+        }
+    }
+}
