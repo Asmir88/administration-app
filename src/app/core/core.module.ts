@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SharedModule } from '../shared/shared.module';
 import { FormularComponent } from './components/formular.component';
 import { CoreRoutingModule } from './core-routing.module';
 import { FormularDetailsComponent } from './components/formular-details/formular-details.component';
