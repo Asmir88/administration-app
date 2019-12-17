@@ -19,10 +19,6 @@
     .add-new-button {
         display: none;
 
-        &:last-child {
-            display: block;
-        }
-
         button {
             border-radius: 50%;
         }
@@ -30,9 +26,7 @@
 
     &:last-child {
         .add-new-button {
-            &:last-child {
-                display: block;
-            }
+            display: block;
         }
     }
 }

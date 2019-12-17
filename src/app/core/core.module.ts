@@ -7,6 +7,8 @@ import { FormularAdministrationComponent } from './components/formular-administr
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { NumberRangePipe } from '../shared/pipes/number-range.pipe';
+import { FormularService } from './components/services/formular.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
     imports: [
@@ -22,8 +24,13 @@ import { NumberRangePipe } from '../shared/pipes/number-range.pipe';
     ],
     exports: [
         FormularComponent,
-        SharedModule
+        SharedModule,
+        HttpClientModule
     ],
-    providers: [NumberRangePipe] 
+    providers: [
+        NumberRangePipe,
+        FormularService,
+        HttpClientModule
+    ] 
 })
 export class CoreModule { }

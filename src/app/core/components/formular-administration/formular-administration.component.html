@@ -1,10 +1,10 @@
 <div class="form-group row mt-50">
     <label for="searchTerm" class="col-sm-3 col-form-label">Formular Name</label>
     <div class="col-sm-7">
-        <input type="text" class="form-control" id="searchTerm">
+        <input #searchField type="text" class="form-control" id="searchTerm">
     </div>
     <div class="col-sm-2">
-        <button type="button" class="btn btn-primary">Search</button>
+        <button type="button" class="btn btn-primary" (click)="search(searchField.value)">Search</button>
     </div>
 </div>
 

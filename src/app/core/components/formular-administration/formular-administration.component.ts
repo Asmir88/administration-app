@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
+import { FormularService } from '../services/formular.service';
+import { Observable } from 'rxjs';
+import { Formular } from '../models/formular.model';
 
 @Component({
     selector: 'formular-administration',
@@ -9,6 +12,7 @@ import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
 export class FormularAdministrationComponent implements OnInit {
     formGroup: FormGroup;
     public elementRows: FormArray;
+    public formulars$: Observable<Formular[]>;
     public range = 10;
     public types = [
         { value: "textbox", text: "Textbox"},
@@ -22,38 +26,63 @@ export class FormularAdministrationComponent implements OnInit {
         { value: "none", text: "None"}
     ];
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private formularService: FormularService
+        ) {
         this.formGroup = this.fb.group({
-            formElements: this.fb.array([this.createFormRow()])
+            name: '',
+            formElements: this.fb.array([])
         });
     }
 
     ngOnInit() {
         this.elementRows = this.formGroup.get('formElements') as FormArray;
+        this.formularService.getAll().subscribe();
+        this.formularService.getByName("new formular").subscribe();
     }
 
-    addRow() {
-        this.elementRows.push(this.createFormRow());
-    }
-
-    createFormRow() {
-        return this.fb.group({
-            name: null,
-            type: null,
-            quantity: null,
-            radioButtonLabels: this.fb.array([]),
-            validator: null
+    public search(text: string) {
+        this.formularService.getByName(text).subscribe((x: Formular) => {
+            this.formGroup = this.fb.group({
+                name: x.name,
+                formElements: this.fb.array([])
+            });
+            this.elementRows = this.formGroup.get('formElements') as FormArray;
+            let field: any;
+            for(field of x.fields) {
+                let form = this.createFormRow(field.name, field.type, field.quantity, field.validator);
+                const labels = form.controls.radioButtonLabels as FormArray;
+                field.radioButtonFields.forEach(label => {
+                    labels.push(this.radioButtonGroup(label.name));
+                });
+                this.elementRows.push(form);
+            }
         });
     }
 
-    changeValue(e, index, field) {
+    public addRow() {
+        this.elementRows.push(this.createFormRow());
+    }
+
+    private createFormRow(name?: string, type?: string, quantity?: number, validator?: string) {
+        return this.fb.group({
+            name: name,
+            type: type,
+            quantity: quantity,
+            radioButtonLabels: this.fb.array([]),
+            validator: validator
+        });
+    }
+
+    public changeValue(e, index, field) {
         const form = this.getFormGroup(index);
         form.get(field).setValue(e.target.value, {
             onlySelf: true
         })
     }
 
-    changeQuantity(e, index) {
+    public changeQuantity(e, index) {
         const form = this.getFormGroup(index);
         form.get('quantity').setValue(e.target.value, {
             onlySelf: true
@@ -76,18 +105,18 @@ export class FormularAdministrationComponent implements OnInit {
         }
     }
 
-    private radioButtonGroup(): FormGroup {
+    private radioButtonGroup(label?: string): FormGroup {
         return this.fb.group({
-            label: ''
+            label: label
         });
     }
 
-    getFormGroup(index): FormGroup {
+    public getFormGroup(index): FormGroup {
         const formGroup = this.elementRows.controls[index] as FormGroup;
         return formGroup;
     }
 
-    onSubmit() {
+    public onSubmit() {
         console.log(this.formGroup);
     }
 }

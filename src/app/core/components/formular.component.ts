@@ -6,5 +6,4 @@ import { Component } from '@angular/core';
     styleUrls: ['./formular.component.scss']
 })
 export class FormularComponent {
-
 }
