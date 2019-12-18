@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormBuilder, FormArray, FormControl } from '@angular/forms';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { FormularService } from '../services/formular.service';
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { Formular } from '../models/formular.model';
 
 @Component({
@@ -9,11 +9,13 @@ import { Formular } from '../models/formular.model';
     templateUrl: './formular-administration.component.html',
     styleUrls: ['./formular-administration.component.scss']
 })
-export class FormularAdministrationComponent implements OnInit {
+export class FormularAdministrationComponent implements OnInit, OnDestroy {
     formGroup: FormGroup;
     public elementRows: FormArray;
     public formulars$: Observable<Formular[]>;
     public range = 10;
+    private subscriptions: Subscription[] = [];
+    public isSaving = false;
     public types = [
         { value: "textbox", text: "Textbox"},
         { value: "checkbox", text: "Checkbox"},
@@ -31,48 +33,70 @@ export class FormularAdministrationComponent implements OnInit {
         private formularService: FormularService
         ) {
         this.formGroup = this.fb.group({
-            name: '',
-            formElements: this.fb.array([])
+            id: new FormControl(null),
+            name: new FormControl(null, Validators.required),
+            fields: this.fb.array([])
         });
     }
 
     ngOnInit() {
-        this.elementRows = this.formGroup.get('formElements') as FormArray;
+        this.elementRows = this.formGroup.get('fields') as FormArray;
         this.formularService.getAll().subscribe();
         this.formularService.getByName("new formular").subscribe();
     }
 
+    ngOnDestroy() {
+        this.subscriptions.forEach(x => x.unsubscribe());
+    }
+
     public search(text: string) {
-        this.formularService.getByName(text).subscribe((x: Formular) => {
-            this.formGroup = this.fb.group({
-                name: x.name,
-                formElements: this.fb.array([])
-            });
-            this.elementRows = this.formGroup.get('formElements') as FormArray;
+        this.subscriptions.push(
+            this.formularService.getByName(text).subscribe((x: Formular) => {
+                this.initializeForm(x, text);
+            },
+                error => this.handleError(error)
+            )
+        );
+    }
+
+    private initializeForm(formular: Formular, defaultName?: string) {
+        this.formGroup = this.fb.group({
+            name: formular && formular.id ? formular.name : defaultName,
+            fields: this.fb.array([])
+        });
+        this.elementRows = this.formGroup.get('fields') as FormArray;
+        if (formular != null) {
+            this.formGroup.addControl('id', new FormControl(formular.id));
             let field: any;
-            for(field of x.fields) {
-                let form = this.createFormRow(field.name, field.type, field.quantity, field.validator);
+            for (field of formular.fields) {
+                let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator);
                 const labels = form.controls.radioButtonLabels as FormArray;
                 field.radioButtonFields.forEach(label => {
-                    labels.push(this.radioButtonGroup(label.name));
+                    labels.push(this.radioButtonGroup(label.id, label.name));
                 });
                 this.elementRows.push(form);
             }
-        });
+        } else {
+            this.addRow();
+        }
     }
 
     public addRow() {
         this.elementRows.push(this.createFormRow());
     }
 
-    private createFormRow(name?: string, type?: string, quantity?: number, validator?: string) {
-        return this.fb.group({
-            name: name,
-            type: type,
-            quantity: quantity,
+    private createFormRow(id?: number, name?: string, type?: string, quantity?: number, validator?: string) {
+        const form = this.fb.group({
+            name: new FormControl(name, Validators.required),
+            type: new FormControl(type, Validators.required),
+            quantity: new FormControl(quantity),
             radioButtonLabels: this.fb.array([]),
-            validator: validator
+            validator: new FormControl(validator, Validators.required)
         });
+        if (id) {
+            form.addControl('id', new FormControl(id));
+        }
+        return form;
     }
 
     public changeValue(e, index, field) {
@@ -80,6 +104,14 @@ export class FormularAdministrationComponent implements OnInit {
         form.get(field).setValue(e.target.value, {
             onlySelf: true
         })
+
+        if (field == 'radiobutton') {
+            form.get('quantity').setValidators([Validators.required]);
+            form.get('quantity').updateValueAndValidity();
+        } else {
+            form.get('quantity').clearValidators();
+            form.get('quantity').updateValueAndValidity();
+        }
     }
 
     public changeQuantity(e, index) {
@@ -105,10 +137,15 @@ export class FormularAdministrationComponent implements OnInit {
         }
     }
 
-    private radioButtonGroup(label?: string): FormGroup {
-        return this.fb.group({
-            label: label
+    private radioButtonGroup(id?: number, label?: string): FormGroup {
+        const form = this.fb.group({
+            label: new FormControl(label, Validators.required)
         });
+
+        if (id) {
+            form.addControl('id', new FormControl(id));
+        }
+        return form;
     }
 
     public getFormGroup(index): FormGroup {
@@ -117,6 +154,50 @@ export class FormularAdministrationComponent implements OnInit {
     }
 
     public onSubmit() {
+        if (this.formGroup.valid) {
+            this.isSaving = true;
+            if (this.formGroup.value.id != null) {
+                this.subscriptions.push(
+                    this.formularService.updateFormular(this.formGroup.value)
+                        .subscribe(x => {
+                            this.initializeForm(x);
+                            this.isSaving = false;
+                        },
+                            error => this.handleError(error)
+                        )
+                    );
+            } else {
+                this.subscriptions.push(
+                    this.formularService.createFormular(this.formGroup.value)
+                        .subscribe(x => {
+                            this.initializeForm(x);
+                            this.isSaving = false;
+                        },
+                            error => this.handleError(error)
+                        )
+                );
+            }
+        }
         console.log(this.formGroup);
+    }
+    
+    public hasError(form: FormGroup, field: string) {
+        return (
+            form.get(field).errors &&
+            form.get(field).errors.required
+        )
+    }
+
+    private handleError(error) {
+        this.isSaving = false;
+        let errorMessage = '';
+        if (error.error instanceof ErrorEvent) {
+            // client-side error
+            errorMessage = `Error: ${error.error.message}`;
+        } else {
+            // server-side error
+            errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
+        }
+        window.alert(errorMessage);
     }
 }
