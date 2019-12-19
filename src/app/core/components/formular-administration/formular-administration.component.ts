@@ -22,11 +22,18 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         { value: "radiobutton", text: "Radio button"}
     ];
 
-    public validators = [
+    private allValidators = [
         { value: "required", text: "Mandatory"},
         { value: "numeric", text: "Number"},
         { value: "none", text: "None"}
     ];
+
+    private selectionFieldValdiators = [
+        { value: "required", text: "Mandatory"},
+        { value: "none", text: "None"}
+    ];
+
+    public validators = this.allValidators;
 
     constructor(
         private fb: FormBuilder,
@@ -50,13 +57,15 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
     }
 
     public search(text: string) {
-        this.subscriptions.push(
-            this.formularService.getByName(text).subscribe((x: Formular) => {
-                this.initializeForm(x, text);
-            },
-                error => this.handleError(error)
-            )
-        );
+        if (text) {
+            this.subscriptions.push(
+                this.formularService.getByName(text).subscribe((x: Formular) => {
+                    this.initializeForm(x, text);
+                },
+                    error => this.handleError(error)
+                )
+            );
+        }
     }
 
     private initializeForm(formular: Formular, defaultName?: string) {
@@ -68,10 +77,10 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         if (formular != null) {
             this.formGroup.addControl('id', new FormControl(formular.id));
             let field: any;
-            for (field of formular.fields) {
+            for (field of formular.fields.sort((a, b) => a.id - b.id)) {
                 let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator);
-                const labels = form.controls.radioButtonLabels as FormArray;
-                field.radioButtonFields.forEach(label => {
+                const labels = form.controls.radioButtonFields as FormArray;
+                field.radioButtonFields.sort((a, b) => a.id - b.id).forEach(label => {
                     labels.push(this.radioButtonGroup(label.id, label.name));
                 });
                 this.elementRows.push(form);
@@ -90,7 +99,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             name: new FormControl(name, Validators.required),
             type: new FormControl(type, Validators.required),
             quantity: new FormControl(quantity),
-            radioButtonLabels: this.fb.array([]),
+            radioButtonFields: this.fb.array([]),
             validator: new FormControl(validator, Validators.required)
         });
         if (id) {
@@ -105,12 +114,20 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             onlySelf: true
         })
 
-        if (field == 'radiobutton') {
+        if (e.target.value == 'radiobutton') {
             form.get('quantity').setValidators([Validators.required]);
             form.get('quantity').updateValueAndValidity();
         } else {
             form.get('quantity').clearValidators();
             form.get('quantity').updateValueAndValidity();
+        }
+    }
+
+    public getValidatorList(type: string) {
+        if (type == 'textbox') {
+            return this.allValidators;
+        } else {
+            return this.selectionFieldValdiators;
         }
     }
 
@@ -120,7 +137,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             onlySelf: true
         })
         const fieldsAmount: number = form.get('quantity').value;
-        const labels = form.controls.radioButtonLabels as FormArray;
+        const labels = form.controls.radioButtonFields as FormArray;
         const labelsAmount = labels.length;
         if (labelsAmount > fieldsAmount) {
             for (let step = labelsAmount - 1; step >= fieldsAmount; step--) {
@@ -139,7 +156,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
 
     private radioButtonGroup(id?: number, label?: string): FormGroup {
         const form = this.fb.group({
-            label: new FormControl(label, Validators.required)
+            name: new FormControl(label, Validators.required)
         });
 
         if (id) {
