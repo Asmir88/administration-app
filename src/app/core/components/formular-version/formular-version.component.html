@@ -1,20 +1,23 @@
 <div class="form-group row mt-50">
     <label for="searchTerm" class="col-sm-3 col-form-label">Formular Name</label>
     <div class="col-sm-5">
-        <input #searchField type="text" class="form-control" id="searchTerm">
+        <!-- <input #searchField type="text" class="form-control" id="searchTerm"> -->
+        <select #formularField class="form-control" (click)="selectFormular($event)">
+            <option *ngFor="let formular of formulars" [value]="formular.id">{{formular.name}}</option>
+        </select>
     </div>
     <div class="col-sm-2">
         <input #versionField type="text" class="form-control" id="version">
     </div>
     <div class="col-sm-2">
-        <button type="button" class="btn btn-primary" (click)="search(searchField.value)">Search</button>
+        <button type="button" class="btn btn-primary"
+            (click)="loadVersion(formularField.value, versionField.value)">Load</button>
     </div>
 </div>
 
 <form class="mt-50" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <div formArrayName="fields">
-        <div class="form-group"
-            *ngFor="let formElement of formGroup.get('fields').controls; let i = index;">
+        <div class="form-group" *ngFor="let formElement of formGroup.get('fields').controls; let i = index;">
             <div [formGroupName]="i" class="row col-sm-12">
                 <label for="formularName" class="col-sm-2 col-form-label">{{formElement.get('name')?.value}}</label>
                 <div class="col-sm-4" [ngSwitch]="formElement.get('type')?.value">
@@ -30,6 +33,12 @@
                                 <input type="radio" value="{{i}}" formControlName="value">{{radio.name}}
                             </p>
                         </ng-container>
+                    </div>
+                    <div class="col-sm-12 error-message" *ngIf="formElement.get('value')?.errors?.required">
+                        Value is required.
+                    </div>
+                    <div class="col-sm-12 error-message" *ngIf="formElement.get('value')?.errors?.mustBeNumeric">
+                        Value must be a number.
                     </div>
                 </div>
             </div>

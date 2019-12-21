@@ -2,13 +2,14 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormularComponent } from './components/formular.component';
 import { CoreRoutingModule } from './core-routing.module';
-import { FormularDetailsComponent } from './components/formular-details/formular-details.component';
+import { FormularVersionComponent } from './components/formular-version/formular-version.component';
 import { FormularAdministrationComponent } from './components/formular-administration/formular-administration.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../shared/shared.module';
 import { NumberRangePipe } from '../shared/pipes/number-range.pipe';
 import { FormularService } from './components/services/formular.service';
 import { HttpClientModule } from '@angular/common/http';
+import { FormularVersionService } from './components/services/formular-version.service';
 
 @NgModule({
     imports: [
@@ -20,7 +21,7 @@ import { HttpClientModule } from '@angular/common/http';
     declarations: [
         FormularComponent,
         FormularAdministrationComponent,
-        FormularDetailsComponent
+        FormularVersionComponent
     ],
     exports: [
         FormularComponent,
@@ -30,7 +31,7 @@ import { HttpClientModule } from '@angular/common/http';
     providers: [
         NumberRangePipe,
         FormularService,
-        HttpClientModule
+        HttpClientModule,
     ] 
 })
 export class CoreModule { }

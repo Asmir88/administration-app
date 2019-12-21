@@ -1,26 +1,31 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormArray, FormBuilder } from '@angular/forms';
-import { Formular } from '../models/formular.model';
+import { Formular } from '../models/formular/formular.model';
 import { FormularService } from '../services/formular.service';
 import { Subscription, Observable } from 'rxjs';
 import { NumericValidator } from 'src/app/shared/validators/numeric.validator';
+import { FormularVersionService } from '../services/formular-version.service';
+import { FormularVersion } from '../models/formular-version/formular-version.model';
 
 @Component({
-    selector: 'formular-details',
-    templateUrl: './formular-details.component.html',
-    styleUrls: ['./formular-details.component.scss']
+    selector: 'formular-version',
+    templateUrl: './formular-version.component.html',
+    styleUrls: ['./formular-version.component.scss']
 })
-export class FormularDetailsComponent {
+export class FormularVersionComponent {
     formGroup: FormGroup;
     public elementRows: FormArray;
     public formulars$: Observable<Formular[]>;
     public range = 10;
     private subscriptions: Subscription[] = [];
     public isSaving = false;
+    public formulars: Formular[] = [];
+    public template: Formular | FormularVersion;
 
     constructor(
         private fb: FormBuilder,
-        private formularService: FormularService
+        private formularService: FormularService,
+        private formularVersionService: FormularVersionService
         ) {
         this.formGroup = this.fb.group({
             id: new FormControl(null),
@@ -31,8 +36,7 @@ export class FormularDetailsComponent {
 
     ngOnInit() {
         this.elementRows = this.formGroup.get('fields') as FormArray;
-        this.formularService.getAll().subscribe();
-        this.formularService.getByName("new formular").subscribe();
+        this.formularService.getAll().subscribe(x => this.formulars = x);
     }
 
     ngOnDestroy() {
@@ -51,16 +55,17 @@ export class FormularDetailsComponent {
         }
     }
 
-    private initializeForm(formular: Formular, defaultName?: string) {
+    private initializeForm(template: Formular | FormularVersion, version?: string) {
         this.formGroup = this.fb.group({
-            name: formular && formular.id ? formular.name : defaultName,
+            id: template && template instanceof FormularVersion ? template.id : null,
+            version: template && template instanceof FormularVersion ? template.version : version,
             fields: this.fb.array([])
         });
         this.elementRows = this.formGroup.get('fields') as FormArray;
-        if (formular != null) {
-            this.formGroup.addControl('id', new FormControl(formular.id));
+        if (template != null) {
+            this.formGroup.addControl('id', new FormControl(template.id));
             let field: any;
-            for (field of formular.fields.sort((a, b) => a.id - b.id)) {
+            for (field of template.fields.sort((a, b) => a.id - b.id)) {
                 let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator);
                 const labels = form.controls.radioButtonFields as FormArray;
                 field.radioButtonFields.sort((a, b) => a.id - b.id).forEach(label => {
@@ -70,6 +75,17 @@ export class FormularDetailsComponent {
             }
         } else {
             this.addRow();
+        }
+    }
+
+    public loadVersion(formularId: number, version: string) {
+        if (formularId && version) {
+            this.formularVersionService.findVersion(formularId, version).subscribe(x => {
+                this.template = x;
+                if (x) {
+                    this.initializeForm(x, version);
+                }
+            });
         }
     }
 

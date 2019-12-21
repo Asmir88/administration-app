@@ -6,7 +6,7 @@ export class FormularField {
         public name: string,
         public type: string,
         public quantity: number,
-        public  validator: string,
+        public validator: string,
         public radioButtonFields: RadioButtonField[]
     ) {}
 }

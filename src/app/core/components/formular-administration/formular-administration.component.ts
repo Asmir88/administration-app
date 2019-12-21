@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { FormularService } from '../services/formular.service';
 import { Observable, Subscription } from 'rxjs';
-import { Formular } from '../models/formular.model';
+import { Formular } from '../models/formular/formular.model';
 
 @Component({
     selector: 'formular-administration',

@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { FormularComponent } from './core/components/formular.component';
 import { CoreRoutingModule } from './core/core-routing.module';
 import { FormularAdministrationComponent } from './core/components/formular-administration/formular-administration.component';
-import { FormularDetailsComponent } from './core/components/formular-details/formular-details.component';
+import { FormularVersionComponent } from './core/components/formular-version/formular-version.component';
 
 const routes: Routes = [
     {
@@ -15,7 +15,7 @@ const routes: Routes = [
             },
             {
                 path: 'formular-administration',
-                component: FormularDetailsComponent
+                component: FormularVersionComponent
             }
         ]
     }

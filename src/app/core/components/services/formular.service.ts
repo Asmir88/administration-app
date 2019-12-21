@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Formular } from '../models/formular.model';
+import { Formular } from '../models/formular/formular.model';
 import { endPoint } from 'config';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
