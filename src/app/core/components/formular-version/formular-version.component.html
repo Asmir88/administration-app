@@ -1,13 +1,12 @@
 <div class="form-group row mt-50">
     <label for="searchTerm" class="col-sm-3 col-form-label">Formular Name</label>
     <div class="col-sm-5">
-        <!-- <input #searchField type="text" class="form-control" id="searchTerm"> -->
-        <select #formularField class="form-control" (click)="selectFormular($event)">
+        <select #formularField class="form-control">
             <option *ngFor="let formular of formulars" [value]="formular.id">{{formular.name}}</option>
         </select>
     </div>
     <div class="col-sm-2">
-        <input #versionField type="text" class="form-control" id="version">
+        <input #versionField type="text" class="form-control">
     </div>
     <div class="col-sm-2">
         <button type="button" class="btn btn-primary"

@@ -29,8 +29,9 @@ export class FormularVersionComponent {
         ) {
         this.formGroup = this.fb.group({
             id: new FormControl(null),
-            name: new FormControl(null, Validators.required),
-            fields: this.fb.array([])
+            version: new FormControl(null, Validators.required),
+            fields: this.fb.array([]),
+            formular: new FormControl(null)
         });
     }
 
@@ -55,18 +56,19 @@ export class FormularVersionComponent {
         }
     }
 
-    private initializeForm(template: Formular | FormularVersion, version?: string) {
+    private initializeForm(template: any, version?: string) {
         this.formGroup = this.fb.group({
-            id: template && template instanceof FormularVersion ? template.id : null,
-            version: template && template instanceof FormularVersion ? template.version : version,
-            fields: this.fb.array([])
+            id: template && template.version ? template.id : null,
+            version: template && template.version ? template.version : version,
+            fields: this.fb.array([]),
+            formular: template && template.formular ? template.formular : template,
         });
         this.elementRows = this.formGroup.get('fields') as FormArray;
         if (template != null) {
             this.formGroup.addControl('id', new FormControl(template.id));
             let field: any;
             for (field of template.fields.sort((a, b) => a.id - b.id)) {
-                let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator);
+                let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator, field.value);
                 const labels = form.controls.radioButtonFields as FormArray;
                 field.radioButtonFields.sort((a, b) => a.id - b.id).forEach(label => {
                     labels.push(this.radioButtonGroup(label.id, label.name));
@@ -80,7 +82,8 @@ export class FormularVersionComponent {
 
     public loadVersion(formularId: number, version: string) {
         if (formularId && version) {
-            this.formularVersionService.findVersion(formularId, version).subscribe(x => {
+            version = version.trim();
+            this.formularVersionService.find(formularId, version).subscribe(x => {
                 this.template = x;
                 if (x) {
                     this.initializeForm(x, version);
@@ -93,14 +96,23 @@ export class FormularVersionComponent {
         this.elementRows.push(this.createFormRow());
     }
 
-    private createFormRow(id?: number, name?: string, type?: string, quantity?: number, validator?: string) {
+    //handle field value for input type
+    private transformValue(type: string, value: any): any {
+        if (type == 'checkbox') {
+            return value == 'true';
+        }
+        return value;
+    }
+
+    //creates another field row in the form - used in "add another row" functionality
+    private createFormRow(id?: number, name?: string, type?: string, quantity?: number, validator?: string, value?: string) {
         const form = this.fb.group({
             name: new FormControl(name),
             type: new FormControl(type),
             quantity: new FormControl(quantity),
             radioButtonFields: this.fb.array([]),
             validator: new FormControl(validator),
-            value: new FormControl(null)
+            value: new FormControl(this.transformValue(type, value) )
         });
         if (id) {
             form.addControl('id', new FormControl(id));
@@ -115,6 +127,7 @@ export class FormularVersionComponent {
         return form;
     }
 
+    //create form for radio button
     private radioButtonGroup(id?: number, label?: string): FormGroup {
         const form = this.fb.group({
             name: new FormControl(label, Validators.required)
@@ -133,30 +146,37 @@ export class FormularVersionComponent {
 
     public onSubmit() {
         if (this.formGroup.valid) {
-        //     this.isSaving = true;
-        //     if (this.formGroup.value.id != null) {
-        //         this.subscriptions.push(
-        //             this.formularService.updateFormular(this.formGroup.value)
-        //                 .subscribe(x => {
-        //                     this.initializeForm(x);
-        //                     this.isSaving = false;
-        //                 },
-        //                     error => this.handleError(error)
-        //                 )
-        //             );
-        //     } else {
-        //         this.subscriptions.push(
-        //             this.formularService.createFormular(this.formGroup.value)
-        //                 .subscribe(x => {
-        //                     this.initializeForm(x);
-        //                     this.isSaving = false;
-        //                 },
-        //                     error => this.handleError(error)
-        //                 )
-        //         );
-        //     }
+            let formBody = this.formGroup;
+            //field values are stored are string on the back end so they have to be converted to strings
+            formBody.value.fields.forEach(element => {
+                element.value = element.value != null ? element.value.toString() : element.value;
+            });
+            this.isSaving = true;
+            if (this.formGroup.value.id != null) {
+                this.subscriptions.push(
+                    this.formularVersionService.update(this.formGroup.value)
+                        .subscribe(x => {
+                            //reinitialize form
+                            this.initializeForm(x);
+                            this.isSaving = false;
+                        },
+                            error => this.handleError(error)
+                        )
+                    );
+            } else {
+                this.subscriptions.push(
+                    this.formularVersionService.create(this.formGroup.value)
+                        .subscribe(x => {
+                            //reinitialize form
+                            this.initializeForm(x);
+                            this.isSaving = false;
+                        },
+                            error => this.handleError(error)
+                        )
+                );
+            }
         }
-        console.log(this.formGroup);
+        console.log(this.formGroup.value);
     }
 
     private handleError(error) {

@@ -58,6 +58,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
 
     public search(text: string) {
         if (text) {
+            text = text.trim();
             this.subscriptions.push(
                 this.formularService.getByName(text).subscribe((x: Formular) => {
                     this.initializeForm(x, text);
@@ -175,7 +176,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             this.isSaving = true;
             if (this.formGroup.value.id != null) {
                 this.subscriptions.push(
-                    this.formularService.updateFormular(this.formGroup.value)
+                    this.formularService.update(this.formGroup.value)
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
@@ -185,7 +186,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                     );
             } else {
                 this.subscriptions.push(
-                    this.formularService.createFormular(this.formGroup.value)
+                    this.formularService.create(this.formGroup.value)
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
@@ -195,7 +196,6 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                 );
             }
         }
-        console.log(this.formGroup);
     }
     
     public hasError(form: FormGroup, field: string) {
