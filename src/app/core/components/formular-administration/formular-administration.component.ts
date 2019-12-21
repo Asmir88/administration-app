@@ -16,6 +16,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
     public range = 10;
     private subscriptions: Subscription[] = [];
     public isSaving = false;
+    public showSubmit = false; //initially hidden
     public types = [
         { value: "textbox", text: "Textbox"},
         { value: "checkbox", text: "Checkbox"},
@@ -48,8 +49,6 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.elementRows = this.formGroup.get('fields') as FormArray;
-        this.formularService.getAll().subscribe();
-        this.formularService.getByName("new formular").subscribe();
     }
 
     ngOnDestroy() {
@@ -62,6 +61,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             this.subscriptions.push(
                 this.formularService.getByName(text).subscribe((x: Formular) => {
                     this.initializeForm(x, text);
+                    this.showSubmit = true;
                 },
                     error => this.handleError(error)
                 )
@@ -196,13 +196,6 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                 );
             }
         }
-    }
-    
-    public hasError(form: FormGroup, field: string) {
-        return (
-            form.get(field).errors &&
-            form.get(field).errors.required
-        )
     }
 
     private handleError(error) {

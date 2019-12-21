@@ -33,15 +33,18 @@
                             </p>
                         </ng-container>
                     </div>
-                    <div class="col-sm-12 error-message" *ngIf="formElement.get('value')?.errors?.required">
-                        Value is required.
-                    </div>
-                    <div class="col-sm-12 error-message" *ngIf="formElement.get('value')?.errors?.mustBeNumeric">
-                        Value must be a number.
+                    <div class="col-sm-12 error-message" 
+                        *ngIf="formElement.get('value').invalid && (formElement.get('value').dirty || formElement.get('value').touched)">
+                        <div *ngIf="formElement.get('value')?.errors?.required">
+                            Value is required.
+                        </div>
+                        <div *ngIf="formElement.get('value')?.errors?.mustBeNumeric">
+                            Value must be a number.
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <button type="submit" class="btn btn-primary">{{formGroup.id ? "Update" : "Submit"}}</button>
+    <button *ngIf="showSubmit" type="submit" class="btn btn-primary">Submit</button>
 </form>

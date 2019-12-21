@@ -19,6 +19,7 @@ export class FormularVersionComponent {
     public range = 10;
     private subscriptions: Subscription[] = [];
     public isSaving = false;
+    public showSubmit = false;
     public formulars: Formular[] = [];
     public template: Formular | FormularVersion;
 
@@ -44,18 +45,6 @@ export class FormularVersionComponent {
         this.subscriptions.forEach(x => x.unsubscribe());
     }
 
-    public search(text: string) {
-        if (text) {
-            this.subscriptions.push(
-                this.formularService.getByName(text).subscribe((x: Formular) => {
-                    this.initializeForm(x, text);
-                },
-                    error => this.handleError(error)
-                )
-            );
-        }
-    }
-
     private initializeForm(template: any, version?: string) {
         this.formGroup = this.fb.group({
             id: template && template.version ? template.id : null,
@@ -63,15 +52,19 @@ export class FormularVersionComponent {
             fields: this.fb.array([]),
             formular: template && template.formular ? template.formular : template,
         });
+        let isNew = true;
+        if(template.id && template.version) {
+            isNew = false;
+        }
         this.elementRows = this.formGroup.get('fields') as FormArray;
         if (template != null) {
             this.formGroup.addControl('id', new FormControl(template.id));
             let field: any;
             for (field of template.fields.sort((a, b) => a.id - b.id)) {
-                let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator, field.value);
+                let form = this.createFormRow(isNew ? null : field.id, field.name, field.type, field.quantity, field.validator, field.value);
                 const labels = form.controls.radioButtonFields as FormArray;
                 field.radioButtonFields.sort((a, b) => a.id - b.id).forEach(label => {
-                    labels.push(this.radioButtonGroup(label.id, label.name));
+                    labels.push(this.radioButtonGroup(isNew ? null : label.id, label.name));
                 });
                 this.elementRows.push(form);
             }
@@ -87,6 +80,7 @@ export class FormularVersionComponent {
                 this.template = x;
                 if (x) {
                     this.initializeForm(x, version);
+                    this.showSubmit = true;
                 }
             });
         }

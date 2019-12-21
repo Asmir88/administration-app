@@ -52,5 +52,5 @@
             </div>
         </div>
     </div>
-    <button [disabled]="isSaving || formGroup.invalid" type="submit" class="btn btn-primary">{{formGroup.id ? "Update" : "Submit"}}</button>
+    <button *ngIf="showSubmit" type="submit" class="btn btn-primary">Submit</button>
 </form>
