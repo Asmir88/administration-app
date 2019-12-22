@@ -89,6 +89,7 @@ export class FormularVersionComponent {
                     this.initializeForm(x, version);
                     this.showSubmit = true;
                     this.showMessage = false;
+                    this.isSubmitted = false;
                 }
             });
         }
