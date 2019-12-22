@@ -13,7 +13,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
     formGroup: FormGroup;
     public elementRows: FormArray;
     public formulars$: Observable<Formular[]>;
-    public range = 10;
+    public range = 10; //the max number of labels/options for radio
     private subscriptions: Subscription[] = [];
     public isSaving = false;
     public showSubmit = false; //initially hidden
@@ -58,6 +58,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                 this.formularService.getByName(text).subscribe((x: Formular) => {
                     this.initializeForm(x, text);
                     this.showSubmit = true;
+                    this.showMessage = false;
                 },
                     error => this.handleError(error)
                 )
@@ -65,6 +66,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         }
     }
 
+    //used to reinitialize form after creating or updating formular
     private initializeForm(formular: Formular, defaultName?: string) {
         this.formGroup = this.fb.group({
             name: formular && formular.id ? formular.name : defaultName,
@@ -78,7 +80,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                 let form = this.createFormRow(field.id, field.name, field.type, field.quantity, field.validator);
                 const labels = form.controls.radioButtonFields as FormArray;
                 field.radioButtonFields.sort((a, b) => a.id - b.id).forEach(label => {
-                    labels.push(this.radioButtonGroup(label.id, label.name));
+                    labels.push(this.createRadioButtonGroup(label.id, label.name));
                 });
                 this.elementRows.push(form);
             }
@@ -120,6 +122,7 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         }
     }
 
+    //used to set labels for radio button (add new or remove existing)
     public changeQuantity(e, index) {
         const form = this.getFormGroup(index);
         form.get('quantity').setValue(e.target.value, {
@@ -134,16 +137,16 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             }
         } else if (labelsAmount < fieldsAmount) {
             for (let step = 0; step < fieldsAmount - labelsAmount; step++) {
-                labels.push(this.radioButtonGroup());
+                labels.push(this.createRadioButtonGroup());
             }
         } else {
             for (let step = 0; step < fieldsAmount; step++) {
-                labels.push(this.radioButtonGroup());
+                labels.push(this.createRadioButtonGroup());
             }
         }
     }
 
-    private radioButtonGroup(id?: number, label?: string): FormGroup {
+    private createRadioButtonGroup(id?: number, label?: string): FormGroup {
         const form = this.fb.group({
             name: new FormControl(label, Validators.required)
         });

@@ -49,6 +49,9 @@ export class FormularVersionComponent {
         this.subscriptions.forEach(x => x.unsubscribe());
     }
 
+    //used to initialize the form based on the received response
+    //if the response is a formular (there is no value) the form fields are generated
+    //if the response is a version (formular version) the form gets generated and its field are initialized with a value
     private initializeForm(template: any, version?: string) {
         this.formGroup = this.fb.group({
             id: template && template.version ? template.id : null,
@@ -85,6 +88,7 @@ export class FormularVersionComponent {
                 if (x) {
                     this.initializeForm(x, version);
                     this.showSubmit = true;
+                    this.showMessage = false;
                 }
             });
         }
@@ -94,7 +98,8 @@ export class FormularVersionComponent {
         this.elementRows.push(this.createFormRow());
     }
 
-    //handle field value for input type
+    //handle field value for input type - all values are transformed to string on submit 
+    //because the value type in the database is a string
     private transformValue(type: string, value: any): any {
         if (type == 'checkbox') {
             return value == 'true';

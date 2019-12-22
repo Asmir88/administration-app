@@ -52,7 +52,7 @@
                 </div>
                 <div class="col-sm-2">
                     <select required class="form-control" formControlName="validator" (change)="changeValue($event, i, 'validator')">
-                        <!-- numeric validation makes only sense for textbox -->
+                        <!-- numeric validation should only be shown for textbox -->
                         <option *ngFor="let option of validators" [value]="option.value"
                         [hidden]="isSelectable(option.value, formElement)">{{option.text}}</option>
                     </select>
