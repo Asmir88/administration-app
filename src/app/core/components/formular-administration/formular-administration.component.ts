@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, FormArray, FormControl, Validators } from '@angular/forms';
 import { FormularService } from '../services/formular.service';
 import { Observable, Subscription } from 'rxjs';
@@ -18,28 +18,24 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
     public isSaving = false;
     public showSubmit = false; //initially hidden
     public types = [
-        { value: "textbox", text: "Textbox"},
-        { value: "checkbox", text: "Checkbox"},
-        { value: "radiobutton", text: "Radio button"}
+        { value: "textbox", text: "Textbox" },
+        { value: "checkbox", text: "Checkbox" },
+        { value: "radiobutton", text: "Radio button" }
     ];
 
-    private allValidators = [
-        { value: "required", text: "Mandatory"},
-        { value: "numeric", text: "Number"},
-        { value: "none", text: "None"}
+    public validators = [
+        { value: "required", text: "Mandatory" },
+        { value: "numeric", text: "Number" },
+        { value: "none", text: "None" }
     ];
 
-    private selectionFieldValdiators = [
-        { value: "required", text: "Mandatory"},
-        { value: "none", text: "None"}
-    ];
-
-    public validators = this.allValidators;
+    public message: string;
+    public showMessage: boolean = false;
 
     constructor(
         private fb: FormBuilder,
         private formularService: FormularService
-        ) {
+    ) {
         this.formGroup = this.fb.group({
             id: new FormControl(null),
             name: new FormControl(null, Validators.required),
@@ -124,14 +120,6 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         }
     }
 
-    public getValidatorList(type: string) {
-        if (type == 'textbox') {
-            return this.allValidators;
-        } else {
-            return this.selectionFieldValdiators;
-        }
-    }
-
     public changeQuantity(e, index) {
         const form = this.getFormGroup(index);
         form.get('quantity').setValue(e.target.value, {
@@ -180,22 +168,35 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
+                            this.message = 'Formular updated';
+                            this.showMessage = true;
                         },
                             error => this.handleError(error)
                         )
-                    );
+                );
             } else {
                 this.subscriptions.push(
                     this.formularService.create(this.formGroup.value)
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
+                            this.message = 'Formular created';
+                            this.showMessage = true;
                         },
                             error => this.handleError(error)
                         )
                 );
             }
         }
+    }
+
+    isSelectable(option: string, form: any) {
+        const type = form.get('type').value;
+        if (option == 'numeric' && (type == 'checkbox' || type == 'radiobutton')) {
+            return true
+        }
+
+        return false;
     }
 
     private handleError(error) {
@@ -209,5 +210,9 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
         }
         window.alert(errorMessage);
+    }
+
+    closeAlert() {
+        this.showMessage = false;
     }
 }

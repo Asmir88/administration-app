@@ -14,6 +14,15 @@
     </div>
 </div>
 
+<div *ngIf="showMessage" class="message-field row">
+    <div #alert class="alert alert-success alert-dismissible fade show">
+        <button type="button" class="close" aria-label="Close" (click)="closeAlert()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        {{message}}
+    </div>
+</div>
+
 <form class="mt-50" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <div formArrayName="fields">
         <div class="form-group" *ngFor="let formElement of formGroup.get('fields').controls; let i = index;">
@@ -34,7 +43,7 @@
                         </ng-container>
                     </div>
                     <div class="col-sm-12 error-message" 
-                        *ngIf="formElement.get('value').invalid && (formElement.get('value').dirty || formElement.get('value').touched)">
+                        *ngIf="formElement.get('value').invalid && (isSubmitted || formElement.get('value').dirty || formElement.get('value').touched)">
                         <div *ngIf="formElement.get('value')?.errors?.required">
                             Value is required.
                         </div>

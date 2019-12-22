@@ -22,6 +22,7 @@ export class FormularVersionComponent {
     public showSubmit = false;
     public formulars: Formular[] = [];
     public template: Formular | FormularVersion;
+    public isSubmitted = false;
 
     constructor(
         private fb: FormBuilder,
@@ -35,6 +36,9 @@ export class FormularVersionComponent {
             formular: new FormControl(null)
         });
     }
+
+    public message: string;
+    public showMessage: boolean = false;
 
     ngOnInit() {
         this.elementRows = this.formGroup.get('fields') as FormArray;
@@ -139,6 +143,7 @@ export class FormularVersionComponent {
     }
 
     public onSubmit() {
+        this.isSubmitted = true;
         if (this.formGroup.valid) {
             let formBody = this.formGroup;
             //field values are stored are string on the back end so they have to be converted to strings
@@ -153,6 +158,8 @@ export class FormularVersionComponent {
                             //reinitialize form
                             this.initializeForm(x);
                             this.isSaving = false;
+                            this.message = 'Version updated';
+                            this.showMessage = true;
                         },
                             error => this.handleError(error)
                         )
@@ -164,13 +171,14 @@ export class FormularVersionComponent {
                             //reinitialize form
                             this.initializeForm(x);
                             this.isSaving = false;
+                            this.message = 'Version created';
+                            this.showMessage = true;
                         },
                             error => this.handleError(error)
                         )
                 );
             }
         }
-        console.log(this.formGroup.value);
     }
 
     private handleError(error) {
@@ -182,5 +190,9 @@ export class FormularVersionComponent {
             errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
         }
         window.alert(errorMessage);
+    }
+
+    closeAlert() {
+        this.showMessage = false;
     }
 }

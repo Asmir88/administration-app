@@ -8,6 +8,15 @@
     </div>
 </div>
 
+<div *ngIf="showMessage" class="message-field row">
+    <div #alert class="alert alert-success alert-dismissible fade show">
+        <button type="button" class="close" aria-label="Close" (click)="closeAlert()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        {{message}}
+    </div>
+</div>
+
 <form class="mt-50" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <div formArrayName="fields">
         <div class="form-group row" *ngFor="let formElement of formGroup.get('fields').controls; let i = index;">
@@ -43,7 +52,9 @@
                 </div>
                 <div class="col-sm-2">
                     <select required class="form-control" formControlName="validator" (change)="changeValue($event, i, 'validator')">
-                        <option *ngFor="let option of getValidatorList(formElement.get('type')?.value)" [value]="option.value">{{option.text}}</option>
+                        <!-- numeric validation makes only sense for textbox -->
+                        <option *ngFor="let option of validators" [value]="option.value"
+                        [hidden]="isSelectable(option.value, formElement)">{{option.text}}</option>
                     </select>
                 </div>
                 <div class="col-sm-1 add-new-button">
