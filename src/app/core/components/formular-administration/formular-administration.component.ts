@@ -29,8 +29,10 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         { value: "none", text: "None" }
     ];
 
-    public message: string;
-    public showMessage: boolean = false;
+    public successMessage: string;
+    public errorMessage: string;
+    public showSuccessMessage: boolean = false;
+    public showErrorMessage: boolean = false;
 
     constructor(
         private fb: FormBuilder,
@@ -58,7 +60,8 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                 this.formularService.getByName(text).subscribe((x: Formular) => {
                     this.initializeForm(x, text);
                     this.showSubmit = true;
-                    this.showMessage = false;
+                    this.showSuccessMessage = false;
+                    this.showErrorMessage = false;
                 },
                     error => this.handleError(error)
                 )
@@ -113,12 +116,17 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
             onlySelf: true
         })
 
-        if (e.target.value == 'radiobutton') {
-            form.get('quantity').setValidators([Validators.required]);
-            form.get('quantity').updateValueAndValidity();
-        } else {
-            form.get('quantity').clearValidators();
-            form.get('quantity').updateValueAndValidity();
+        if (field == "type") {
+            if (e.target.value == 'radiobutton') {
+                form.get('quantity').setValidators([Validators.required]);
+                form.get('quantity').updateValueAndValidity();
+            } else {
+                form.get('quantity').clearValidators();
+                form.get('quantity').updateValueAndValidity();
+                form.get('quantity').reset();
+                let labels = form.controls.radioButtonFields as FormArray;
+                labels.clear();
+            }
         }
     }
 
@@ -171,8 +179,9 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
-                            this.message = 'Formular updated';
-                            this.showMessage = true;
+                            this.successMessage = 'Formular updated';
+                            this.showSuccessMessage = true;
+                            this.showErrorMessage = false;
                         },
                             error => this.handleError(error)
                         )
@@ -183,13 +192,17 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
                         .subscribe(x => {
                             this.initializeForm(x);
                             this.isSaving = false;
-                            this.message = 'Formular created';
-                            this.showMessage = true;
+                            this.successMessage = 'Formular created';
+                            this.showSuccessMessage = true;
+                            this.showErrorMessage = false;
                         },
                             error => this.handleError(error)
                         )
                 );
             }
+        } else {
+            this.errorMessage = "Form is invalid. All fields must be filled in.";
+            this.showErrorMessage = true;
         }
     }
 
@@ -215,7 +228,11 @@ export class FormularAdministrationComponent implements OnInit, OnDestroy {
         window.alert(errorMessage);
     }
 
-    closeAlert() {
-        this.showMessage = false;
+    closeSuccessAlert() {
+        this.showSuccessMessage = false;
+    }
+
+    closeErrorAlert() {
+        this.showErrorMessage = false;
     }
 }

@@ -8,12 +8,21 @@
     </div>
 </div>
 
-<div *ngIf="showMessage" class="message-field row">
+<div *ngIf="showSuccessMessage" class="message-field row">
     <div #alert class="alert alert-success alert-dismissible fade show">
-        <button type="button" class="close" aria-label="Close" (click)="closeAlert()">
+        <button type="button" class="close" aria-label="Close" (click)="closeSuccessAlert()">
             <span aria-hidden="true">&times;</span>
         </button>
-        {{message}}
+        {{successMessage}}
+    </div>
+</div>
+
+<div *ngIf="showErrorMessage" class="message-field row">
+    <div #alert class="alert alert-warning alert-dismissible fade show">
+        <button type="button" class="close" aria-label="Close" (click)="closeErrorAlert()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+        {{errorMessage}}
     </div>
 </div>
 
